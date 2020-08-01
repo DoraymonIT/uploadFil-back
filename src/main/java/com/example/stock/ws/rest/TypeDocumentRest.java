@@ -8,7 +8,10 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -73,15 +76,18 @@ public int deleteById(@PathVariable Long id) {
                decompressBytes(retrievedImage.getData()));
        return img;
    }
-//   @RequestMapping(value = "/print/{id}")
-//   public ResponseEntity<byte[]> generateReport(@PathVariable("imageName") String imageName){
-//       Map<String, Object> mapper = new HashMap<String, Object>();
-//       byte[] content =  exportService.export(mapper, ReportUtils.testReport, ReportUtils.FileFormat.PDF.toString());
-//       return new ResponseEntity<>(content, Utils.getPDFHeaders("Situation_test.pdf"), HttpStatus.OK);
-//   }
-//   
-   
-   
+    @GetMapping("/resume/download/{imageName}")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable("imageName") String imageName) {
+        TypeDocument resumeFile = typeCongeeService.findByLibelle(imageName);
+        byte[] buffer = resumeFile.getData();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", resumeFile.getContentType());
+//        headers.set("Content-Disposition", "attachment; filename=\"" + "yourfilename" );
+        return new ResponseEntity<byte[]>(buffer, headers, HttpStatus.OK);
+    }
+
+
+
    
    // compress the image bytes before storing it in the database
    public static byte[] compressBytes(byte[] data) {
